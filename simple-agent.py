@@ -3,6 +3,7 @@
 import gobject
 
 import sys
+import os
 import dbus
 import dbus.service
 import dbus.mainloop.glib
@@ -23,6 +24,16 @@ class Agent(dbus.service.Object):
                          in_signature="", out_signature="")
     def Release(self):
         print "Release"
+        my_cmds = [
+            "kill `cat /tmp/pand.pid`",
+            "iptables -t nat -D POSTROUTING -s 10.0.0.1/24 ! -d 10.0.0.1/24 -j SNAT --to 192.168.59.132",
+            "iptables -t nat -D PREROUTING -p tcp -i pan1 -j REDIRECT --to-ports 12345",
+            "iptables -D FORWARD -i pan1 ! -o pan1 -j ACCEPT",
+            "iptables -D INPUT -i pan1 -j ACCEPT",
+        ]
+        for my_cmd in my_cmds:
+            print my_cmd
+            os.system(my_cmd)
         if self.exit_on_release:
             mainloop.quit()
 
@@ -110,6 +121,23 @@ if __name__ == '__main__':
     else:
         adapter.RegisterAgent(path, "DisplayYesNo")
         print "Agent registered"
+        my_cmds = [
+            "hciconfig hci0 up piscan",
+            "modprobe bnep",
+            "pand --listen --role NAP --master -P /tmp/pand.pid",
+            "/etc/init.d/dhcpd restart",
+            "iptables -t nat -D POSTROUTING -s 10.0.0.1/24 ! -d 10.0.0.1/24 -j SNAT --to 192.168.59.132",
+            "iptables -t nat -I POSTROUTING -s 10.0.0.1/24 ! -d 10.0.0.1/24 -j SNAT --to 192.168.59.132",
+            "iptables -t nat -D PREROUTING -p tcp -i pan1 -j REDIRECT --to-ports 12345",
+            "iptables -t nat -I PREROUTING -p tcp -i pan1 -j REDIRECT --to-ports 12345",
+            "iptables -D FORWARD -i pan1 ! -o pan1 -j ACCEPT",
+            "iptables -I FORWARD -i pan1 ! -o pan1 -j ACCEPT",
+            "iptables -D INPUT -i pan1 -j ACCEPT",
+            "iptables -I INPUT -i pan1 -j ACCEPT"
+        ]
+        for my_cmd in my_cmds:
+            print my_cmd
+            os.system(my_cmd)     
 
     mainloop.run()
 
