@@ -29,6 +29,7 @@ class Agent(dbus.service.Object):
             "iptables -t nat -D POSTROUTING -s 10.0.0.1/24 ! -d 10.0.0.1/24 -j SNAT --to 192.168.59.132",
             "iptables -t nat -D PREROUTING -p tcp -i pan1 -j REDIRECT --to-ports 12345",
             "iptables -D FORWARD -i pan1 ! -o pan1 -j ACCEPT",
+            "iptables -D FORWARD ! -i pan1 -o pan1 -j ACCEPT",
             "iptables -D INPUT -i pan1 -j ACCEPT",
         ]
         for my_cmd in my_cmds:
@@ -130,6 +131,8 @@ if __name__ == '__main__':
             "iptables -t nat -I POSTROUTING -s 10.0.0.1/24 ! -d 10.0.0.1/24 -j SNAT --to 192.168.59.132",
             "iptables -t nat -D PREROUTING -p tcp -i pan1 -j REDIRECT --to-ports 12345",
             "iptables -t nat -I PREROUTING -p tcp -i pan1 -j REDIRECT --to-ports 12345",
+            "iptables -D FORWARD ! -i pan1 -o pan1 -j ACCEPT",
+            "iptables -I FORWARD ! -i pan1 -o pan1 -j ACCEPT",
             "iptables -D FORWARD -i pan1 ! -o pan1 -j ACCEPT",
             "iptables -I FORWARD -i pan1 ! -o pan1 -j ACCEPT",
             "iptables -D INPUT -i pan1 -j ACCEPT",
